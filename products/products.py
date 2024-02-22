@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from API.api import GetAllProducts, GetSingleProducts
+from API.api import GetAllProducts, GetSingleProducts, GetAllProductsCategory
 products_bp = Blueprint('products_bp', __name__,
     template_folder='templates',
     static_folder='static')
@@ -14,5 +14,14 @@ def index():
 @products_bp.route('/products/<int:id>')
 def detailOfProduct(id):
     data = GetSingleProducts(id)
-
-    return render_template('products/detail.html', detailOfPorduct = data)
+    #nacteni nazvu kategorie z promenne data do promenne categories
+    categories = data["category"]
+    #nacteni vsech produktu pres metodu GetAllProductsCategory(categories)
+    allProducts = GetAllProductsCategory(categories)
+    categoryProduct = [product for product in allProducts if product["category"] == categories]
+    l = len(categoryProduct)
+    if l > 5:
+        l = 5
+    filtered_products = [product for product in categoryProduct if product["id"] != id]
+    fourProducts = filtered_products[:l]
+    return render_template('products/detail.html',length = l, id=id, detailOfProduct=data, features=fourProducts)
